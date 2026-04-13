@@ -42,7 +42,9 @@ Set `LD_PRELOAD="/usr/local/lib/libjemalloc.so.2"` in the application image or a
 
 ## CI
 
-Reusable workflow **`.github/workflows/build-base-image.yml`** uses **`muthur-command/builder`** composite actions (`@mc`; pin by SHA/tag in production).
+Workflow **`.github/workflows/builder.yml`**: **Alpine / Debian / Ubuntu** jobs run on every push and PR. **`base-python`** jobs run **only on `release` (`published`)**, because each Python Dockerfile does **`FROM ghcr.io/<owner>/base:<alpine>`** — that tag must already exist in GHCR after the Alpine matrix has **pushed**. On a **first-time** repo, open a **release** (or temporarily set the workflow to push on `push` to `mc`/`main` if you accept publishing pre-release tags).
+
+Reusable **`.github/workflows/build-base-image.yml`** uses **`muthur-command/builder`** composite actions (pin by SHA/tag in production).
 
 ## Building locally
 

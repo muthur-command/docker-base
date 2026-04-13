@@ -50,6 +50,7 @@ jobs:
             push=true
           else
             version="${GITHUB_SHA::7}"
+            push=false
           fi
 
           echo "architectures=${ARCHITECTURES}" >> "$GITHUB_OUTPUT"
@@ -148,8 +149,12 @@ jobs:
       push: ${{ needs.init.outputs.push == 'true' }}
       version: ${{ needs.init.outputs.version }}
 
+  # Python layers FROM ghcr.io/<owner>/base:<alpine>; that tag exists only after Alpine
+  # jobs have pushed (release workflow). PR/branch runs use push=false → skip to avoid
+  # pulling a non-existent private image on first CI.
   build_python:
     name: Python ${{ matrix.python_version }} (Alpine ${{ matrix.alpine_version }})
+    if: needs.init.outputs.push == 'true'
     needs: [init, build_alpine]
     strategy:
       fail-fast: false
