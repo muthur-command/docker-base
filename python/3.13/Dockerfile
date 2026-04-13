@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=ghcr.io/home-assistant/base
+ARG BASE_IMAGE=ghcr.io/muthur-command/base
 ARG BASE_VERSION=3.23
 ARG BUILD_FROM=${BASE_IMAGE}:${BASE_VERSION}
 FROM ${BUILD_FROM}
@@ -115,5 +115,5 @@ RUN set -ex; \
     pip --version
 
 LABEL \
-    io.hass.type="base" \
-    io.hass.base.name="python"
+    io.mcio.type="base" \
+    io.mcio.base.name="python"

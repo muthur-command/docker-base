@@ -19,8 +19,8 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /usr/src
 
 ARG TARGETARCH
-ARG BASHIO_VERSION=0.17.5
-ARG TEMPIO_VERSION=2024.11.2
+ARG BASHIO_VERSION=mc_v0.17.5
+ARG TEMPIO_VERSION=mc_2026.04.1
 ARG S6_OVERLAY_VERSION=3.2.2.0
 
 RUN \
@@ -53,11 +53,11 @@ RUN \
     && mkdir -p /etc/services.d \
     \
     && curl -L -f -s -o /usr/bin/tempio \
-        "https://github.com/home-assistant/tempio/releases/download/${TEMPIO_VERSION}/tempio_${TEMPIO_ARCH}" \
+        "https://github.com/muthur-command/tempio/releases/download/${TEMPIO_VERSION}/tempio_${TEMPIO_ARCH}" \
     && chmod a+x /usr/bin/tempio \
     \
     && mkdir -p /usr/src/bashio \
-    && curl -L -f -s "https://github.com/hassio-addons/bashio/archive/v${BASHIO_VERSION}.tar.gz" \
+    && curl -L -f -s "https://github.com/mcio-addons/bashio/archive/${BASHIO_VERSION}.tar.gz" \
         | tar -xzf - --strip 1 -C /usr/src/bashio \
     && mv /usr/src/bashio/lib /usr/lib/bashio \
     && ln -s /usr/lib/bashio/bashio /usr/bin/bashio \
@@ -70,5 +70,5 @@ WORKDIR /
 ENTRYPOINT ["/init"]
 
 LABEL \
-    io.hass.type="base" \
-    io.hass.base.name="ubuntu"
+    io.mcio.type="base" \
+    io.mcio.base.name="ubuntu"
