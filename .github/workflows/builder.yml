@@ -2,9 +2,9 @@ name: Build base images
 
 on:
   push:
-    branches: ["main", "master", "mc"]
+    branches: ["mc"]
   pull_request:
-    branches: ["main", "master", "mc"]
+    branches: ["mc"]
   release:
     types: ["published"]
 

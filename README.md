@@ -1,5 +1,7 @@
 # MCOS base images (`docker-base`)
 
+中文文档: [`README.zh-CN.md`](./README.zh-CN.md)
+
 Docker base images for **MCOS** / **muthur-command** container builds (add-ons, plugins, Core).
 
 | Item | In this repo |
