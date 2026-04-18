@@ -1,23 +1,23 @@
-# MCOS 基础镜像（`docker-base`）
+# Muthur Command 基础镜像
 
-用于 **MCOS** / **muthur-command** 容器构建（add-ons、plugins、Core）的 Docker 基础镜像仓库。
+英文文档: [`README.md`](./README.md)
 
-| 项目 | 本仓库约定 |
-|--------|----------------|
-| GHCR 命名空间 | **`ghcr.io/muthur-command/`**（CI 使用 `${{ github.repository_owner }}`；正式发布到 **`muthur-command`**） |
-| OCI 标签 | 基础层与 CI 注入元数据统一使用 **`io.mcio.*`** |
-| TempIO 二进制 | **`https://github.com/muthur-command/tempio/releases/...`** |
-| Alpine Python 包索引 | 默认使用 **PyPI**（`https://pypi.org/simple`）通过 pip / uv；不使用第三方 wheel 镜像。在 musl 环境下，若 PyPI 无现成 wheel，部分包可能走源码构建。若需私有索引，可通过 **`UV_EXTRA_INDEX_URL`** 或 **`pip.conf`** 覆盖。 |
+这些基础镜像是用于构建 Muthur Command 容器与 add-on 的 Docker 基础镜像。  
+建议将本仓库镜像作为您自有 **Muthur Command Add-on** 的基础镜像。
 
-镜像内集成了 [S6-Overlay](https://github.com/just-containers/s6-overlay)、[Bashio](https://github.com/hassio-addons/bashio) 与 [TempIO](https://github.com/muthur-command/tempio)。
+不建议将本镜像用作其他与 Muthur Command 无关的 Docker 项目的基础。
 
-## 架构
+镜像内包含 [S6-Overlay](https://github.com/just-containers/s6-overlay)、[Bashio](https://github.com/mcio-addons/bashio) 与 [TempIO](https://github.com/muthur-command/tempio)。
 
-支持 `amd64` 与 `arm64`（`aarch64`），并在适用场景发布多架构 manifest。
+## 支持的架构
+
+镜像面向 Muthur Command 官方支持的平台构建，即 `amd64` 与 `arm64`。
+
+自 **2026.03.1** 起，上述平台均以 **多架构（multi-arch）** 形式发布。仍可使用旧的前缀镜像名（`aarch64-*`、`amd64-*`），但 **优先建议使用多架构镜像**。
 
 ## 基础镜像
 
-Alpine 版本跟随 [Alpine releases](https://alpinelinux.org/releases/)。
+仅支持未 EOL 的版本，参见：<https://alpinelinux.org/releases/>
 
 | 镜像 | 操作系统 | Tags | latest |
 |-------|----|------|--------|
@@ -25,30 +25,76 @@ Alpine 版本跟随 [Alpine releases](https://alpinelinux.org/releases/)。
 
 ### jemalloc
 
-在支持的场景（Alpine 构建）下，可在应用镜像或运行时设置：`LD_PRELOAD="/usr/local/lib/libjemalloc.so.2"`。
+在支持的平台上可使用 jemalloc。若要在应用中启用，请在 Dockerfile 中或启动应用前设置环境变量：`LD_PRELOAD="/usr/local/lib/libjemalloc.so.2"`。
 
 ### Python 镜像
 
-| 镜像 | 操作系统 | Python | 说明 |
-|-------|----|--------|--------|
-| base-python | Alpine | 3.12, 3.13, 3.14 | 默认基于 **`ghcr.io/muthur-command/base:<alpine>`** 构建 |
+在最新的 3 个 Alpine 版本上支持最新的 3 个 Python 主版本线。
 
-### Debian / Ubuntu
+| 镜像 | 操作系统 | Python 版本 | Tags | latest |
+|-------|----|-----------------|------|--------|
+| base-python | Alpine | 3.12, 3.13, 3.14 | 3.12-alpine3.21, 3.12-alpine3.22, 3.12-alpine3.23, 3.13-alpine3.21, 3.13-alpine3.22, 3.13-alpine3.23, 3.14-alpine3.21, 3.14-alpine3.22, 3.14-alpine3.23 | 3.14-alpine3.23 |
 
-| 镜像 | 操作系统 | Tags |
-|-------|----|------|
-| base-debian | Debian | bookworm, trixie |
-| base-ubuntu | Ubuntu | 22.04, 24.04 |
+## 其他
 
-## CI
+### Debian 镜像
 
-工作流 **`.github/workflows/builder.yml`**：每次 push 和 PR 都会运行 **Alpine / Debian / Ubuntu** 构建。**`base-python`** 仅在 **`release`（`published`）** 触发，因为各 Python Dockerfile 都是 **`FROM ghcr.io/<owner>/base:<alpine>`**，必须先在 Alpine 矩阵中完成 push 后，GHCR 上才有可用基础镜像。首次初始化仓库时，建议先发一个 **release**（或临时允许在 `mc`/`main` 的 `push` 上推送，接受预发布 tag）。
+**说明**：我们更推荐基于 **Alpine** 的版本，因其更适合 IoT。若确需 **glibc** 环境，可使用本类镜像。
 
-可复用工作流 **`.github/workflows/build-base-image.yml`** 使用 **`muthur-command/builder`** 组合 Action（生产环境建议固定 SHA/tag）。
+| 镜像 | 操作系统 | Tags | latest |
+|-------|----|------|--------|
+| base-debian | Debian | bookworm, trixie | trixie |
 
-## 本地构建
+### Ubuntu 镜像
 
-使用 Docker BuildKit / `buildx`。以下为基于已发布 MCOS base 的 Python 镜像示例：
+**说明**：我们更推荐基于 **Alpine** 的版本，因其更适合 IoT。若确需 **glibc** 环境，可使用本类镜像。
+
+| 镜像 | 操作系统 | Tags | latest |
+|-------|----|------|--------|
+| base-ubuntu | Ubuntu | 22.04, 24.04 | 24.04 |
+
+## 本地构建镜像
+
+可使用 Docker BuildKit（`docker buildx`）在本地构建，无需额外工具链。以下为在 **单一（宿主机）架构** 上构建的示例。
+
+若需多平台构建或交叉编译，请为 `docker buildx build` 指定 `--platform` 及目标平台。详见 Docker 官方文档：[多平台构建](https://docs.docker.com/build/building/multi-platform/)。
+
+### 示例
+
+使用 Dockerfile 中的默认 Alpine 版本构建 base：
+
+```bash
+docker buildx build -t base alpine/
+```
+
+指定 Alpine 基础版本：
+
+```bash
+docker buildx build \
+  --build-arg ALPINE_VERSION=3.21 \
+  -t base:3.21 \
+  alpine/
+```
+
+Debian base：
+
+```bash
+docker buildx build \
+  --build-arg DEBIAN_VERSION=trixie \
+  -t base-debian:trixie \
+  debian/
+```
+
+Ubuntu base：
+
+```bash
+docker buildx build \
+  --build-arg UBUNTU_VERSION=24.04 \
+  -t base-ubuntu:24.04 \
+  ubuntu/
+```
+
+Python 3.14 镜像，基于 GHCR 上的 Muthur Command Alpine 3.23 base：
 
 ```bash
 docker buildx build \
@@ -58,6 +104,8 @@ docker buildx build \
   python/3.14/
 ```
 
-## 许可证
+## 来源
 
-见 **LICENSE**（Apache-2.0；保留上游版权信息）。MCOS 的 **NOTICE** 建议在法务确认后补充。
+- **上游：** [home-assistant/docker-base](https://github.com/home-assistant/docker-base) — 面向 Home Assistant 生态的 Docker 基础镜像，本目录由其移植而来。
+- **本仓库：** **Muthur Command** 在此维护该副本，供 **Muthur Command OS** 的 CI 使用；镜像配方与 tag 可能随时间与上游产生差异。
+- **许可：** 自上游继承的代码仍为 **Apache-2.0**；见 [`LICENSE`](./LICENSE)。

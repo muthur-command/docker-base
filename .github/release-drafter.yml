@@ -1,6 +1,4 @@
 template: |
-  **MCOS** base images (`ghcr.io/muthur-command/…`, **`io.mcio.*`** labels). See repository **README.md**.
-
   ## What’s Changed
 
   $CHANGES

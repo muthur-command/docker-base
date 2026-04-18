@@ -1,25 +1,21 @@
-# MCOS base images (`docker-base`)
+# Muthur Command Base Images
 
-中文文档: [`README.zh-CN.md`](./README.zh-CN.md)
+These base images are designed as Docker base images for use with building Muthur Command containers and add-ons.
+It is recommended to use these as a base for your own Muthur Command Add-ons.
 
-Docker base images for **MCOS** / **muthur-command** container builds (add-ons, plugins, Core).
+Using these images as a base for other Docker projects is, however, not recommended.
 
-| Item | In this repo |
-|--------|----------------|
-| GHCR namespace | **`ghcr.io/muthur-command/`** (CI uses `${{ github.repository_owner }}`; publish under **`muthur-command`**) |
-| OCI labels | **`io.mcio.*`** on base layers and CI-injected metadata |
-| TempIO binary | **`https://github.com/muthur-command/tempio/releases/...`** |
-| Python package index (Alpine) | **PyPI** default (`https://pypi.org/simple`) via pip / uv; no third-party wheel mirror. On musl, some packages may build from source unless wheels exist on PyPI. Override with **`UV_EXTRA_INDEX_URL`** or **`pip.conf`** if you add a private index. |
+The image include [S6-Overlay](https://github.com/just-containers/s6-overlay), [Bashio](https://github.com/mcio-addons/bashio) and [TempIO](https://github.com/muthur-command/tempio).
 
-Images bundle [S6-Overlay](https://github.com/just-containers/s6-overlay), [Bashio](https://github.com/hassio-addons/bashio), and [TempIO](https://github.com/muthur-command/tempio).
+## Supported architectures
 
-## Architectures
+Images are built for all platforms officially supported by Muthur Command, which are `amd64` and `arm64`.
 
-`amd64` and `arm64` (`aarch64`), published as multi-arch manifests where applicable.
+Beginning with the 2026.03.1 release, all images are published as multi-arch images for these platforms. The old architecture-prefixed images (`aarch64-*`, `amd64-*`) are still available but preferably the multi-arch images should be used.
 
 ## Base images
 
-Alpine versions follow [Alpine releases](https://alpinelinux.org/releases/).
+We support version that are not EOL: https://alpinelinux.org/releases/
 
 | Image | OS | Tags | latest |
 |-------|----|------|--------|
@@ -27,30 +23,77 @@ Alpine versions follow [Alpine releases](https://alpinelinux.org/releases/).
 
 ### jemalloc
 
-Set `LD_PRELOAD="/usr/local/lib/libjemalloc.so.2"` in the application image or at runtime where supported (Alpine build).
+We support on our platforms jemalloc. On the application which you want to enable it, set as environment `LD_PRELOAD="/usr/local/lib/libjemalloc.so.2"` on your Dockerfile or before you start the application.
 
 ### Python images
 
-| Image | OS | Python | Notes |
-|-------|----|--------|--------|
-| base-python | Alpine | 3.12, 3.13, 3.14 | Built on **`ghcr.io/muthur-command/base:<alpine>`** by default |
+We support the latest 3 release with the latest 3 Alpine version.
 
-### Debian / Ubuntu
+| Image | OS | Python versions | Tags | latest |
+|-------|----|-----------------|------|--------|
+| base-python | Alpine | 3.12, 3.13, 3.14 | 3.12-alpine3.21, 3.12-alpine3.22, 3.12-alpine3.23, 3.13-alpine3.21, 3.13-alpine3.22, 3.13-alpine3.23, 3.14-alpine3.21, 3.14-alpine3.22, 3.14-alpine3.23 | 3.14-alpine3.23 |
 
-| Image | OS | Tags |
-|-------|----|------|
-| base-debian | Debian | bookworm, trixie |
-| base-ubuntu | Ubuntu | 22.04, 24.04 |
+## Others
 
-## CI
+### Debian images
 
-Workflow **`.github/workflows/builder.yml`**: **Alpine / Debian / Ubuntu** jobs run on every push and PR. **`base-python`** jobs run **only on `release` (`published`)**, because each Python Dockerfile does **`FROM ghcr.io/<owner>/base:<alpine>`** — that tag must already exist in GHCR after the Alpine matrix has **pushed**. On a **first-time** repo, open a **release** (or temporarily set the workflow to push on `push` to `mc`/`main` if you accept publishing pre-release tags).
+**Note**: We prefer the Alpine based version because it's more IoT friendly. In some case, you need a glibc system like this.
 
-Reusable **`.github/workflows/build-base-image.yml`** uses **`muthur-command/builder`** composite actions (pin by SHA/tag in production).
+| Image | OS | Tags | latest |
+|-------|----|------|--------|
+| base-debian | Debian | bookworm, trixie | trixie |
 
-## Building locally
+### Ubuntu images
 
-Use Docker BuildKit / `buildx`. Example Python image on published MCOS base:
+**Note**: We prefer the alpine based version because it's more IoT friendly. In some case, you need a glibc system like this.
+
+| Image | OS | Tags | latest |
+|-------|----|------|--------|
+| base-ubuntu | Ubuntu | 22.04, 24.04 | 24.04 |
+
+## Building images locally
+
+Docker BuildKit (`docker buildx`) can be used for building the images locally without any extra tooling. Following are examples of building the images for a single (host) architecture.
+
+
+For a multi-platform build or cross-compilation, use the `--platform` flag with the appropriate target platform. See the official Docker documentation on [multi-platform builds](https://docs.docker.com/build/building/multi-platform/) for more details.
+
+### Examples
+
+Alpine base using the default version from the Dockerfile:
+
+```bash
+docker buildx build -t base alpine/
+```
+
+To use a specific Alpine base version:
+
+```bash
+docker buildx build \
+  --build-arg ALPINE_VERSION=3.21 \
+  -t base:3.21 \
+  alpine/
+```
+
+Debian base:
+
+```bash
+docker buildx build \
+  --build-arg DEBIAN_VERSION=trixie \
+  -t base-debian:trixie \
+  debian/
+```
+
+Ubuntu base:
+
+```bash
+docker buildx build \
+  --build-arg UBUNTU_VERSION=24.04 \
+  -t base-ubuntu:24.04 \
+  ubuntu/
+```
+
+Python 3.14 image, using the Muthur Command Alpine 3.23 base image from GHCR:
 
 ```bash
 docker buildx build \
@@ -60,6 +103,8 @@ docker buildx build \
   python/3.14/
 ```
 
-## License
+## Origin
 
-See **LICENSE** (Apache-2.0; upstream copyright retained). Add **NOTICE** for MCOS when legal approves.
+- **Upstream:** [home-assistant/docker-base](https://github.com/home-assistant/docker-base) — Docker base images for Home Assistant ecosystem builds, from which this tree was ported.
+- **In this repo:** **Muthur Command** keeps this copy for Muthur Command OS CI; image recipes and tags may diverge from upstream over time.
+- **License:** Code inherited from upstream remains **Apache-2.0**; see [`LICENSE`](./LICENSE).
