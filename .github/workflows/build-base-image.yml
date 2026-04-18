@@ -98,7 +98,7 @@ jobs:
     steps:
       - name: Prepare multi-arch matrix
         id: prepare
-        uses: muthur-command/builder/actions/prepare-multi-arch-matrix@mc_2026.04.0
+        uses: muthur-command/builder/actions/prepare-multi-arch-matrix@835ddc80473ffc71527d677f85c6f828b64b9da9
         with:
           architectures: ${{ inputs.architectures }}
           image-name: ${{ inputs.image-name }}
@@ -131,7 +131,7 @@ jobs:
 
       - name: Build image
         id: build
-        uses: muthur-command/builder/actions/build-image@mc_2026.04.0
+        uses: muthur-command/builder/actions/build-image@835ddc80473ffc71527d677f85c6f828b64b9da9
         with:
           arch: ${{ matrix.arch }}
           build-args: ${{ inputs.build-args }}
@@ -166,7 +166,7 @@ jobs:
       packages: write
     steps:
       - name: Publish multi-arch manifest
-        uses: muthur-command/builder/actions/publish-multi-arch-manifest@mc_2026.04.0
+        uses: muthur-command/builder/actions/publish-multi-arch-manifest@835ddc80473ffc71527d677f85c6f828b64b9da9
         with:
           architectures: ${{ inputs.architectures }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
