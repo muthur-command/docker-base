@@ -27,6 +27,7 @@ jobs:
           declare -i newpost
           datepre=$(date --utc '+%Y.%m')
 
+          # No tags: first release is YYYY.MM.0; legacy tags may use mc_ prefix (stripped below).
           latest=""
           tag_sha=$(git rev-list --tags --max-count=1 2>/dev/null || true)
           if [[ -n "$tag_sha" ]]; then
@@ -51,10 +52,10 @@ jobs:
             newpost=0
           fi
 
-          version_tag="mc_${datepre}.${newpost}"
+          version_tag="${datepre}.${newpost}"
           semver="${datepre}.${newpost}"
           echo "Current version: ${latest:-<no tags>}"
-          echo "New target version: $version_tag (semver for drafter: $semver)"
+          echo "New target version: $version_tag (Release Drafter version: $semver)"
           echo "version=$version_tag" >> "$GITHUB_OUTPUT"
           echo "semver=$semver" >> "$GITHUB_OUTPUT"
 
