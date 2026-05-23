@@ -1,6 +1,12 @@
 name: Build base images
 
 on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish images to registry"
+        type: boolean
+        default: true
   push:
     branches: ["mc"]
   pull_request:
@@ -48,6 +54,9 @@ jobs:
           if [[ "${EVENT_NAME}" == "release" ]]; then
             version="${RELEASE_TAG}"
             push=true
+          elif [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
+            version="${GITHUB_SHA::7}"
+            push="${{ github.event.inputs.publish }}"
           else
             version="${GITHUB_SHA::7}"
             push=false
