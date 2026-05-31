@@ -150,8 +150,8 @@ jobs:
           image: ${{ matrix.image }}
           image-tags: ${{ inputs.image-tags }}
           labels: |
-            io.mcio.base.arch=${{ matrix.arch }}
-            io.mcio.base.version=${{ inputs.version }}
+            io.mcos.base.arch=${{ matrix.arch }}
+            io.mcos.base.version=${{ inputs.version }}
             ${{ inputs.labels }}
           push: ${{ inputs.push }}
           version: ${{ inputs.version }}

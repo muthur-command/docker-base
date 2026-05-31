@@ -7,7 +7,7 @@
 
 不建议将本镜像用作其他与 Muthur Command 无关的 Docker 项目的基础。
 
-镜像内包含 [S6-Overlay](https://github.com/just-containers/s6-overlay)、[Bashio](https://github.com/mcio-addons/bashio) 与 [TempIO](https://github.com/muthur-command/tempio)。
+镜像内包含 [S6-Overlay](https://github.com/just-containers/s6-overlay)、[Bashio](https://github.com/mcos-addons/bashio) 与 [TempIO](https://github.com/muthur-command/tempio)。
 
 ## 支持的架构
 

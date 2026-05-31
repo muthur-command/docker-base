@@ -57,7 +57,7 @@ RUN \
     && chmod a+x /usr/bin/tempio \
     \
     && mkdir -p /usr/src/bashio \
-    && curl -L -f -s "https://github.com/mcio-addons/bashio/archive/${BASHIO_VERSION}.tar.gz" \
+    && curl -L -f -s "https://github.com/mcos-addons/bashio/archive/${BASHIO_VERSION}.tar.gz" \
         | tar -xzf - --strip 1 -C /usr/src/bashio \
     && mv /usr/src/bashio/lib /usr/lib/bashio \
     && ln -s /usr/lib/bashio/bashio /usr/bin/bashio \
@@ -70,5 +70,5 @@ WORKDIR /
 ENTRYPOINT ["/init"]
 
 LABEL \
-    io.mcio.type="base" \
-    io.mcio.base.name="ubuntu"
+    io.mcos.type="base" \
+    io.mcos.base.name="ubuntu"

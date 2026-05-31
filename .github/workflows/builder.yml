@@ -96,7 +96,7 @@ jobs:
         ${{ matrix.alpine_version }}-${{ needs.init.outputs.version }}
         ${{ matrix.alpine_version == needs.init.outputs.alpine_latest && 'latest' || '' }}
       labels: |
-        io.mcio.base.image=alpine:${{ matrix.alpine_version }}
+        io.mcos.base.image=alpine:${{ matrix.alpine_version }}
       push: ${{ needs.init.outputs.push == 'true' }}
       version: ${{ needs.init.outputs.version }}
 
@@ -125,7 +125,7 @@ jobs:
         ${{ matrix.debian_version }}-${{ needs.init.outputs.version }}
         ${{ matrix.debian_version == needs.init.outputs.debian_latest && 'latest' || '' }}
       labels: |
-        io.mcio.base.image=debian:${{ matrix.debian_version }}-slim
+        io.mcos.base.image=debian:${{ matrix.debian_version }}-slim
       push: ${{ needs.init.outputs.push == 'true' }}
       version: ${{ needs.init.outputs.version }}
 
@@ -154,7 +154,7 @@ jobs:
         ${{ matrix.ubuntu_version }}-${{ needs.init.outputs.version }}
         ${{ matrix.ubuntu_version == needs.init.outputs.ubuntu_latest && 'latest' || '' }}
       labels: |
-        io.mcio.base.image=ubuntu:${{ matrix.ubuntu_version }}
+        io.mcos.base.image=ubuntu:${{ matrix.ubuntu_version }}
       push: ${{ needs.init.outputs.push == 'true' }}
       version: ${{ needs.init.outputs.version }}
 
@@ -191,6 +191,6 @@ jobs:
         ${{ matrix.python_version }}-alpine${{ matrix.alpine_version }}-${{ needs.init.outputs.version }}
         ${{ matrix.alpine_version == needs.init.outputs.alpine_latest && matrix.python_version == needs.init.outputs.python_latest && 'latest' || '' }}
       labels: |
-        io.mcio.base.image=ghcr.io/${{ github.repository_owner }}/base:${{ matrix.alpine_version }}
+        io.mcos.base.image=ghcr.io/${{ github.repository_owner }}/base:${{ matrix.alpine_version }}
       push: ${{ needs.init.outputs.push == 'true' }}
       version: ${{ needs.init.outputs.version }}

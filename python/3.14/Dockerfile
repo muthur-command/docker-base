@@ -116,5 +116,5 @@ RUN set -ex; \
     pip --version
 
 LABEL \
-    io.mcio.type="base" \
-    io.mcio.base.name="python"
+    io.mcos.type="base" \
+    io.mcos.base.name="python"
