@@ -1,0 +1,105 @@
+# After a docker-base GitHub Release, open PRs in repos that pin base / base-python images.
+# Requires org/repo secret DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN (PAT or GitHub App token)
+# with contents:write on supervisor, docker, and plugin-* repos.
+#
+# Renovate (.github/renovate.json in those repos) is a backup on a 12h schedule.
+
+name: Bump downstream docker-base pins
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag (e.g. 2026.06.1)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - supervisor
+          - docker
+          - plugin-audio
+          - plugin-dns
+          - plugin-cli
+          - plugin-multicast
+          - plugin-observer
+    steps:
+      - name: Check downstream bump token
+        id: token
+        env:
+          DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN: ${{ secrets.DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN }}
+        run: |
+          if [[ -z "${DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN}" ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::warning::DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN is not set. Skipping downstream PRs for ${{ matrix.repo }}."
+            echo "Configure a PAT with contents:write on supervisor, docker, and plugin-* repos."
+            echo "Renovate in those repos will still open PRs on its schedule if the Renovate app is enabled."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Normalize release version
+        if: steps.token.outputs.skip != 'true'
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${{ github.event.release.tag_name }}"
+          fi
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "pin=${tag#mc_}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout docker-base (scripts)
+        if: steps.token.outputs.skip != 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Checkout ${{ matrix.repo }}
+        if: steps.token.outputs.skip != 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: muthur-command/${{ matrix.repo }}
+          ref: mc
+          token: ${{ secrets.DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN }}
+          path: consumer
+          persist-credentials: false
+
+      - name: Apply docker-base pin bump
+        if: steps.token.outputs.skip != 'true'
+        run: |
+          chmod +x ./scripts/bump-downstream-docker-base-pin.sh
+          ./scripts/bump-downstream-docker-base-pin.sh \
+            "${{ matrix.repo }}" \
+            "${{ github.workspace }}/consumer" \
+            "${{ steps.version.outputs.tag }}"
+
+      - name: Create pull request
+        if: steps.token.outputs.skip != 'true'
+        uses: peter-evans/create-pull-request@2f38cd26bfebe301a5ee90bdd6550a69dc3ef23f # v7.0.4
+        with:
+          token: ${{ secrets.DOCKER_BASE_DOWNSTREAM_BUMP_TOKEN }}
+          path: consumer
+          base: mc
+          branch: "bump/docker-base-${{ steps.version.outputs.pin }}"
+          delete-branch: true
+          labels: dependencies
+          title: "chore(deps): bump docker-base images to ${{ steps.version.outputs.pin }}"
+          commit-message: "chore(deps): bump docker-base images to ${{ steps.version.outputs.pin }}"
+          body: |
+            Automated PR from [docker-base](https://github.com/muthur-command/docker-base) release `${{ steps.version.outputs.tag }}`.
+
+            **You still need to (manual):**
+            - Review and merge this PR (wait for GHCR images from this release if CI verifies cosign)
+            - Publish a new release for `${{ matrix.repo }}` when appropriate
+            - For `docker` / `mc_bd`: release **docker** before bumping **mc_bd** `BASE_IMAGE_VERSION`
+
+            Also tracked by Renovate (`custom.regex` on `muthur-command/base` / `base-python`).
